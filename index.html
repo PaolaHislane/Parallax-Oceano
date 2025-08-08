@@ -28,7 +28,6 @@
             background-color: #000;
         }
 
-    
         .parallax-background {
             position: fixed;
             top: 0;
@@ -37,6 +36,8 @@
             height: 100%;
             z-index: -1;
             overflow: hidden;
+            will-change: transform; /* Otimização para GPU */
+            transform: translateZ(0); /* Forçar aceleração por hardware */
         }
 
         .sky-container {
@@ -56,6 +57,7 @@
             object-fit: cover;
             pointer-events: none;
             transition: opacity 0.8s ease;
+            will-change: opacity; /* Otimização */
         }
 
         #ceu-dia {
@@ -83,6 +85,7 @@
             left: 50%;
             transform: translateX(-50%);
             transition: all 0.5s ease;
+            will-change: top, filter; /* Otimização */
         }
 
         /* Efeito de vidro sobre o parallax */
@@ -143,7 +146,7 @@
             text-transform: uppercase;
             letter-spacing: 8px;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease;
+            will-change: transform; /* Otimização */
         }
 
         .texto-2 {
@@ -183,7 +186,7 @@
             width: auto;
             border-radius: 10px;
             overflow: hidden;
-            transition: all 0.8s;
+            transition: transform 0.5s ease, box-shadow 0.5s ease; /* Simplificado */
             cursor: pointer;
             position: relative;
             display: flex;
@@ -198,7 +201,6 @@
 
         .box1:hover {
             transform: translateY(-10px) scale(1.05);
-            transition: all 0.5s ease;
             box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
         }
 
@@ -338,16 +340,16 @@
     <!-- Background parallax fixo -->
     <div class="parallax-background">
         <div class="sky-container">
-            <img src="/img/ceu-dia.jpg.png" alt="Céu diurno" id="ceu-dia">
-            <img src="/img/por-do-sol.jpg.png" alt="Pôr do sol" id="por-do-sol">
-            <img src="/img/ceu-noite.jpg.png" alt="Céu noturno" id="ceu-noite">
-            <img src="/img/sol.png" alt="Sol e Lua" id="sol-lua">
+            <img src="/img/ceu-dia.jpg.png" alt="Céu diurno" id="ceu-dia" loading="lazy">
+            <img src="/img/por-do-sol.jpg.png" alt="Pôr do sol" id="por-do-sol" loading="lazy">
+            <img src="/img/ceu-noite.jpg.png" alt="Céu noturno" id="ceu-noite" loading="lazy">
+            <img src="/img/sol.png" alt="Sol e Lua" id="sol-lua" loading="lazy">
         </div>
     </div>
 
     <!-- Ondas fixas -->
     <div class="ocean-fixed">
-        <img src="/img/ondas.png.png" alt="Ondas do mar" id="ondas">
+        <img src="/img/ondas.png.png" alt="Ondas do mar" id="ondas" loading="lazy">
     </div>
 
     <!-- Conteúdo principal -->
@@ -405,31 +407,41 @@
     </div>
 
     <script>
-        document.addEventListener('scroll', function() {
-            const value = window.scrollY;
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.body.scrollHeight;
-            const scrollPercentage = value / (documentHeight - windowHeight);
+        // Otimização: throttle para o evento scroll
+        let lastScrollTime = 0;
+        const scrollThrottleTime = 16; // ~60fps
+
+        function handleScroll() {
+            const now = Date.now();
+            if (now - lastScrollTime < scrollThrottleTime) return;
+            lastScrollTime = now;
             
-            const normalizedScroll = Math.min(Math.max(scrollPercentage, 0), 1);
-            
-            // Removemos o transform do parallax-background para mantê-lo fixo
-            // document.querySelector('.parallax-background').style.transform = `translateY(${value * 0.5}px)`;
-            
-            // Transições do céu
-            document.getElementById('ceu-dia').style.opacity = 1 - normalizedScroll * 1.5;
-            document.getElementById('por-do-sol').style.opacity = Math.min(normalizedScroll * 3, 1);
-            document.getElementById('ceu-noite').style.opacity = Math.max((normalizedScroll - 0.3) * 2, 0); 
-            
-            // Movimento do sol/lua
-            document.getElementById('sol-lua').style.top = `${100 + value * 0.7}px`;
-            document.getElementById('sol-lua').style.filter = `brightness(${1 - normalizedScroll * 1.5}) hue-rotate(${normalizedScroll * 180}deg)`;
-            
-            // Efeito no texto hero
-            if (value < windowHeight) {
-                document.getElementById('texto').style.transform = `translateY(${value * 0.8}px)`;
-            }
-        });
+            requestAnimationFrame(() => {
+                const value = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.body.scrollHeight;
+                const scrollPercentage = value / (documentHeight - windowHeight);
+                
+                const normalizedScroll = Math.min(Math.max(scrollPercentage, 0), 1);
+                
+                // Transições do céu
+                document.getElementById('ceu-dia').style.opacity = 1 - normalizedScroll * 1.5;
+                document.getElementById('por-do-sol').style.opacity = Math.min(normalizedScroll * 3, 1);
+                document.getElementById('ceu-noite').style.opacity = Math.max((normalizedScroll - 0.3) * 2, 0); 
+                
+                // Movimento do sol/lua
+                document.getElementById('sol-lua').style.top = `${100 + value * 0.7}px`;
+                document.getElementById('sol-lua').style.filter = `brightness(${1 - normalizedScroll * 1.5}) hue-rotate(${normalizedScroll * 180}deg)`;
+                
+                // Efeito no texto hero
+                if (value < windowHeight) {
+                    document.getElementById('texto').style.transform = `translateY(${value * 0.8}px)`;
+                }
+            });
+        }
+
+        // Usando passive events para melhor performance
+        document.addEventListener('scroll', handleScroll, { passive: true });
 
         function adjustForMobile() {
             const textoElement = document.getElementById('texto');
@@ -438,7 +450,7 @@
                 textoElement.style.marginTop = '-50px';
             } else {
                 textoElement.style.fontSize = '8em';
-                textoElement.style.marginTop = '-100px';
+                textoElement.style.marginTop = '0';
             }
         }
 
