@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+    <title>Parallax Oceano</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --altura-ondas: 25vh;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Josefin Sans', sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+            color: white;
+            position: relative;
+            background-color: #000;
+        }
+
+    
+        .parallax-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .sky-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sky-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        #ceu-dia {
+            z-index: 1;
+            opacity: 1;
+        }
+
+        #por-do-sol {
+            z-index: 2;
+            opacity: 0;
+        }
+
+        #ceu-noite {
+            z-index: 3;
+            opacity: 0;
+        }
+
+        #sol-lua {
+            z-index: 4;
+            width: 25vmin;
+            height: 25vmin;
+            min-width: 150px;
+            min-height: 150px;
+            top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease;
+        }
+
+        /* Efeito de vidro sobre o parallax */
+        .parallax-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(2px);
+            z-index: 5;
+        }
+
+        /* Ondas fixas */
+        .ocean-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--altura-ondas);
+            max-height: 200px;
+            z-index: 1;
+        }
+
+        #ondas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: bottom;
+        }
+
+        /* Conteúdo principal */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            background: transparent;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #texto {
+            position: relative;
+            color: white;
+            z-index: 6;
+            font-size: 8em;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease;
+        }
+
+        .texto-2 {
+            padding: 100px 20%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .primeiro {
+            text-align: center;
+        }
+
+        .primeiro h2 {
+            font-size: 40px;
+            color: #4fc3f7;
+            letter-spacing: 0.5px;
+            margin-bottom: 30px;
+        }
+
+        .primeiro p {
+            color: #e0e0e0;
+            font-size: 15px;
+            line-height: 28px;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, auto));
+            grid-gap: 1.7rem;
+            align-items: center;
+            margin-top: 5rem;
+        }
+
+        .box {
+            height: 340px;
+            width: auto;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.8s;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .box1 {
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 75%, #000 100%), url('/img/tartaruga.jpg') center center no-repeat;
+            background-size: cover;
+        }
+
+        .box1:hover {
+            transform: translateY(-10px) scale(1.05);
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+
+        .box2 {
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 75%, #000 100%), url('/img/corais.jpg') center center no-repeat;
+            background-size: cover;
+        }
+
+        .box3 {
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 75%, #000 100%), url('/img/golfinho.jpg') center center no-repeat;
+            background-size: cover;
+        }
+
+        .box4 {
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 75%, #000 100%), url('/img/naufragios.jpg') center center no-repeat;
+            background-size: cover;
+        }
+
+        .in {
+            position: absolute;
+            bottom: 20px;
+            color: white;
+            font-size: 22px;
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            width: 90%;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .descricao {
+            display: none;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        .box:hover .in {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+        }
+
+        .box:hover .descricao {
+            display: block;
+        }
+
+        .rodape {
+            text-align: center;
+            color: #4fc3f7;
+            padding-top: 150px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 1024px) {
+            .texto-2 {
+                padding: 80px 8%;
+            }
+            
+            #texto {
+                font-size: 6em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --altura-ondas: 20vh;
+            }
+            
+            .texto-2 {
+                padding: 60px 5%;
+            }
+            
+            #texto {
+                font-size: 4em;
+                letter-spacing: 4px;
+                margin-top: -50px;
+            }
+            
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .box {
+                height: 280px;
+            }
+            
+            .primeiro h2 {
+                font-size: 32px;
+            }
+            
+            .primeiro p {
+                font-size: 14px;
+            }
+            
+            .in {
+                font-size: 18px;
+                padding: 10px;
+            }
+            
+            .descricao {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --altura-ondas: 15vh;
+            }
+            
+            #texto {
+                font-size: 3em;
+            }
+            
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .box {
+                height: 240px;
+            }
+            
+            .in {
+                font-size: 16px;
+                padding: 8px;
+            }
+            
+            .descricao {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background parallax fixo -->
+    <div class="parallax-background">
+        <div class="sky-container">
+            <img src="/img/ceu-dia.jpg.png" alt="Céu diurno" id="ceu-dia">
+            <img src="/img/por-do-sol.jpg.png" alt="Pôr do sol" id="por-do-sol">
+            <img src="/img/ceu-noite.jpg.png" alt="Céu noturno" id="ceu-noite">
+            <img src="/img/sol.png" alt="Sol e Lua" id="sol-lua">
+        </div>
+    </div>
+
+    <!-- Ondas fixas -->
+    <div class="ocean-fixed">
+        <img src="/img/ondas.png.png" alt="Ondas do mar" id="ondas">
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div class="content-wrapper">
+        <section class="hero-section">
+            <h1 id="texto">Parallax Oceano</h1>
+        </section>
+
+        <div class="texto-2">
+            <div class="primeiro">
+                <h2>Explore o Oceano</h2>
+                <p>O oceano cobre mais de 70% da superfície do nosso planeta, um vasto mundo azul cheio de mistérios e maravilhas. Descubra a beleza escondida nas profundezas do mar, onde a luz do sol se transforma em sombras misteriosas e a vida floresce em formas extraordinárias. Cada mergulho é uma nova aventura, cada onda traz uma nova história, cada visita revela um pouco mais desse ecossistema vital para a Terra.</p>
+                
+                <p>Das águas rasas dos recifes de coral, pulsing de vida e cor, às profundezas abissais onde criaturas bioluminescentes iluminam a escuridão eterna, o oceano é um universo à parte, ainda pouco explorado pela humanidade. Suas correntes regulam o clima global, suas águas produzem mais da metade do oxigênio que respiramos, e suas profundezas guardam segredos que podem revolucionar a medicina e a ciência.</p>
+            </div>
+
+            <div class="container">
+                <div class="box box1">
+                    <div class="in">
+                        <p>Tartarugas Marinhas</p>
+                        <p class="descricao">Viajantes ancestrais que cruzam oceanos há milhões de anos, as tartarugas marinhas são símbolos de resistência e conexão entre os ecossistemas costeiros.</p>
+                    </div>
+                </div>
+
+                <div class="box box2">
+                    <div class="in">
+                        <p>Recifes de Coral</p>
+                        <p class="descricao">Os corais formam as "florestas tropicais do mar", abrigando 25% de toda a vida marinha em apenas 1% do fundo oceânico, verdadeiras cidades subaquáticas.</p>
+                    </div>
+                </div>
+
+                <div class="box box3">
+                    <div class="in">
+                        <p>Golfinhos</p>
+                        <p class="descricao">Inteligentes e sociáveis, os golfinhos possuem culturas complexas, sistemas de comunicação sofisticados e demonstram empatia e cooperação extraordinárias.</p>
+                    </div>
+                </div>
+
+                <div class="box box4">
+                    <div class="in">
+                        <p>Naufrágios</p>
+                        <p class="descricao">Relíquias do passado que se transformaram em recifes artificiais, os naufrágios contam histórias humanas enquanto abrigam novas comunidades marinhas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rodape">
+                <p>&copy; Todos os direitos reservados</p><br>
+                <a href="https://paolahhbraga.netlify.app/" target="_blank"
+                                style="color: #4fc3f7; text-decoration: none;">
+                                <i class="fas fa-laptop-code"></i> Paola Braga
+                            </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('scroll', function() {
+            const value = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.body.scrollHeight;
+            const scrollPercentage = value / (documentHeight - windowHeight);
+            
+            const normalizedScroll = Math.min(Math.max(scrollPercentage, 0), 1);
+            
+            // Removemos o transform do parallax-background para mantê-lo fixo
+            // document.querySelector('.parallax-background').style.transform = `translateY(${value * 0.5}px)`;
+            
+            // Transições do céu
+            document.getElementById('ceu-dia').style.opacity = 1 - normalizedScroll * 1.5;
+            document.getElementById('por-do-sol').style.opacity = Math.min(normalizedScroll * 3, 1);
+            document.getElementById('ceu-noite').style.opacity = Math.max((normalizedScroll - 0.3) * 2, 0); 
+            
+            // Movimento do sol/lua
+            document.getElementById('sol-lua').style.top = `${100 + value * 0.7}px`;
+            document.getElementById('sol-lua').style.filter = `brightness(${1 - normalizedScroll * 1.5}) hue-rotate(${normalizedScroll * 180}deg)`;
+            
+            // Efeito no texto hero
+            if (value < windowHeight) {
+                document.getElementById('texto').style.transform = `translateY(${value * 0.8}px)`;
+            }
+        });
+
+        function adjustForMobile() {
+            const textoElement = document.getElementById('texto');
+            if (window.innerWidth < 768) {
+                textoElement.style.fontSize = '4em';
+                textoElement.style.marginTop = '-50px';
+            } else {
+                textoElement.style.fontSize = '8em';
+                textoElement.style.marginTop = '-100px';
+            }
+        }
+
+        window.addEventListener('load', adjustForMobile);
+        window.addEventListener('resize', adjustForMobile);
+
+        // Garante que o body tenha altura suficiente
+        function adjustBodyHeight() {
+            const contentHeight = document.querySelector('.content-wrapper').offsetHeight;
+            document.body.style.minHeight = contentHeight + 'px';
+        }
+
+        window.addEventListener('load', adjustBodyHeight);
+        window.addEventListener('resize', adjustBodyHeight);
+    </script>
+</body>
+</html>
